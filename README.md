@@ -1,304 +1,271 @@
-Multi-Tenant API Management Platform
+# Multi-Tenant API Management Platform
 
-A backend-only Spring Boot application that demonstrates multi-tenant API management, subscription-based access control, per-API rate limiting, and usage analytics.
+A backend-only Spring Boot application that simulates a production-style **API Management and Traffic Control Platform**.
+The system models how modern SaaS infrastructure platforms manage API keys, enforce subscription-based access, apply rate limiting policies, and track usage analytics across multiple tenants.
 
-The system models how modern SaaS infrastructure platforms manage API keys, enforce traffic control policies, and monitor usage across multiple tenant applications.
+---
 
-📌 Project Overview
+## 📌 Project Overview
 
-This project implements a multi-tenant API access management platform where SaaS companies can define and protect their APIs using configurable subscription plans and rate limiting policies.
+This project implements a **multi-tenant API access management platform** where SaaS companies can register their APIs, configure subscription plans, and enforce usage policies.
 
-It focuses on backend system design, policy enforcement, traffic control, and infrastructure-level architecture rather than frontend functionality.
+The focus is on backend architecture, policy-driven enforcement, infrastructure-level traffic control, and scalable system design — without frontend dependencies.
 
-Key goals:
+### Key Goals
 
-Support multiple SaaS tenants
+- Support multiple SaaS tenants
+- Define APIs per tenant
+- Configure subscription plans per tenant
+- Enforce per-API per-tier rate limits
+- Enforce tenant-level monthly quota
+- Implement Redis-based rate limiting
+- Process usage logs asynchronously using RabbitMQ
+- Provide analytics endpoints
+- Deploy using Docker and AWS
+- Automate build and deployment using CI/CD
+- Extend into a lightweight reverse proxy (Phase 2)
 
-Allow tenants to define and protect their APIs
+---
 
-Enforce per-API per-subscription rate limits
+## 🧠 Core Concepts Implemented
 
-Track usage and enforce tenant-level quotas
+- Multi-Tenant Backend Architecture
+- API Key Authentication & Lifecycle Management
+- Subscription Plan Enforcement
+- Per-API Per-Tier Rate Limiting
+- Tenant-Level Monthly Quota Tracking
+- Redis Atomic Counters
+- Event-Driven Async Logging
+- Infrastructure-Oriented Backend Design
+- Reverse Proxy Simulation (Phase 2)
 
-Implement Redis-based rate limiting
+---
 
-Process usage logs asynchronously using RabbitMQ
+## 🏢 Multi-Tenant Support
 
-Deploy using Docker and AWS
-
-Automate build and deployment using CI/CD
-
-🧠 Core Concepts Implemented
-
-Multi-Tenant System Design
-
-API Key Authentication & Lifecycle Management
-
-Subscription Plan Configuration per Tenant
-
-Per-API Per-Tier Rate Limiting
-
-Tenant-Level Monthly Quota Enforcement
-
-Redis-Based Atomic Counters
-
-Event-Driven Usage Logging
-
-Backend-First Infrastructure Design
-
-Reverse Proxy Simulation (Phase 2)
-
-🏢 Multi-Tenant Support
-
-The platform supports multiple SaaS tenants.
+The platform supports multiple independent SaaS tenants.
 
 Each tenant can:
 
-Register in the system
+- Register in the system
+- Define and manage their APIs
+- Create subscription plans
+- Generate API keys
+- Monitor usage analytics independently
 
-Define their own APIs
+All configurations and policies are tenant-scoped to ensure isolation.
 
-Create multiple subscription plans
+---
 
-Generate API keys for their customers
+## 🔌 API Definitions Per Tenant
 
-Monitor usage and analytics independently
-
-All data and policies are scoped per tenant to ensure isolation.
-
-🔌 API Definitions Per Tenant
-
-Each tenant can register API definitions they want to protect.
+Each tenant can define APIs they want to protect.
 
 An API definition includes:
 
-Logical identifier
+- Logical identifier
+- HTTP method (GET / POST / PUT / DELETE)
+- Path
+- Active status
+- (Phase 2) Target URL for reverse proxy forwarding
 
-HTTP method
+This allows fine-grained access control per API.
 
-Path
+---
 
-Active status
+## 📦 Subscription Plans Per Tenant
 
-(Phase 2) Target URL for request forwarding
+Tenants can configure multiple subscription tiers such as:
 
-This enables fine-grained policy enforcement per API.
+| Plan       | Description                             |
+| ---------- | --------------------------------------- |
+| FREE       | Limited access with strict usage limits |
+| PRO        | Higher limits and expanded access       |
+| ENTERPRISE | Maximum limits and full access          |
 
-📦 Subscription Plans Per Tenant
+Each subscription plan defines:
 
-Tenants can define subscription tiers such as:
+- Monthly request quota
+- Per-API rate limits
+- Access permissions
 
-FREE
+Plans are configurable per tenant.
 
-PRO
+---
 
-ENTERPRISE
-
-Each subscription plan specifies:
-
-Monthly request quota
-
-Per-API rate limits
-
-Access permissions
-
-Plans are fully configurable per tenant.
-
-⏱ Per-API Per-Tier Rate Limiting
+## ⏱ Per-API Per-Tier Rate Limiting
 
 Rate limiting is enforced based on:
 
-API Key
-
-API Definition
-
-Subscription Plan
+- API Key
+- API Definition
+- Subscription Plan
 
 Example:
 
-FREE plan → 10 requests/minute for /orders
-
-PRO plan → 100 requests/minute for /orders
+- FREE → 10 requests/minute on `/orders`
+- PRO → 100 requests/minute on `/orders`
 
 Each API can have different limits for different subscription tiers.
 
-📊 Tenant-Level Monthly Quota
+---
 
-In addition to short-term rate limits, each tenant has a monthly usage quota.
+## 📊 Tenant-Level Monthly Quota
 
-Tracked per tenant
+In addition to short-term rate limiting, each tenant has a monthly usage quota.
 
-Enforced per billing cycle
+- Tracked per tenant
+- Enforced per billing cycle
+- Requests are blocked when quota is exceeded
+- Simulates subscription-based billing enforcement
 
-Requests are blocked when quota is exceeded
+---
 
-Used to simulate subscription enforcement
+## 🔐 API Key Lifecycle
 
-🔐 API Key Lifecycle
+API keys:
 
-API keys are:
+- Are generated per tenant
+- Are linked to a specific subscription plan
+- Are securely stored (hashed)
+- Must be provided via `X-API-KEY` header
+- Can be activated or revoked
 
-Generated per tenant
+The API key represents the identity and subscription tier of the consuming client.
 
-Associated with a specific subscription plan
+---
 
-Securely stored (hashed)
+# ⚡ Infrastructure & Performance
 
-Required in the X-API-KEY header
-
-Can be activated or revoked
-
-The API key represents the identity and plan of the consuming client.
-
-⚡ Infrastructure & Performance
-🔴 Redis-Based Rate Limiting
+## 🔴 Redis-Based Rate Limiting
 
 Redis is used for:
 
-Per-API per-key request counters
+- Per-API per-key request counters
+- Tenant-level monthly usage counters
+- Atomic increment operations
+- High-performance traffic enforcement
 
-Tenant-level monthly usage counters
+Redis ensures concurrency safety and real-time limit enforcement.
 
-High-performance atomic increment operations
+---
 
-Temporary window-based rate limiting
-
-Redis ensures:
-
-Concurrency safety
-
-High throughput
-
-Accurate real-time enforcement
-
-🟠 RabbitMQ Async Logging
+## 🟠 RabbitMQ Async Logging
 
 Every successful API request publishes a usage event.
 
 RabbitMQ is used to:
 
-Process usage logs asynchronously
+- Process usage logs asynchronously
+- Prevent blocking request threads
+- Simulate event-driven backend systems
 
-Avoid blocking request threads
+A consumer service persists usage logs for analytics processing.
 
-Simulate event-driven backend architecture
+---
 
-A consumer stores usage records for analytics and reporting.
+# 📈 Analytics Endpoints
 
-📈 Analytics Endpoints
+The platform provides analytics APIs for tenants, including:
 
-The platform exposes analytics APIs for tenants, including:
-
-Total requests per tenant
-
-Requests per API
-
-Daily usage breakdown
-
-Remaining monthly quota
-
-Top APIs by traffic
+- Total requests per tenant
+- Requests per API
+- Daily usage breakdown
+- Remaining monthly quota
+- Top APIs by usage
 
 These endpoints simulate real-world SaaS usage dashboards.
 
-🐳 Docker & AWS Deployment
-Dockerization
+---
 
-The entire system is containerized:
+# 🐳 Docker & AWS Deployment
 
-Spring Boot Application
+## Dockerization
 
-MySQL
+The full stack is containerized using Docker:
 
-Redis
+- Spring Boot Application
+- MySQL
+- Redis
+- RabbitMQ
 
-RabbitMQ
+Docker Compose enables complete local execution.
 
-Docker Compose enables full-stack local execution.
+---
 
-AWS Deployment
+## AWS Deployment
 
 The application is deployed on AWS EC2.
 
 Deployment includes:
 
-Docker-based service hosting
+- Docker-based service hosting
+- Network and security configuration
+- Production-style infrastructure setup
 
-Network and security configuration
+---
 
-Production-like environment setup
-
-🔄 CI/CD Pipeline
+# 🔄 CI/CD Pipeline
 
 GitHub Actions is used to implement CI/CD.
 
 Pipeline includes:
 
-Automated build on push
+- Automated build on push
+- Test execution
+- Docker image creation
+- Optional image publishing
+- Deployment automation
 
-Test execution
+This simulates real-world DevOps workflow.
 
-Docker image creation
+---
 
-Optional image publishing
+# 🚀 Phase 2 – Reverse Proxy Layer
 
-Deployment automation
-
-This simulates production-grade DevOps practices.
-
-🚀 Phase 2 – Reverse Proxy Layer
-
-After completing the core Level 2 platform, the system is extended with a lightweight reverse proxy layer.
+After completing the core Level 2 platform, the system is extended into a lightweight reverse proxy layer.
 
 In Phase 2:
 
-Incoming API requests are validated
-
-Rate limits and quotas are enforced
-
-Requests are forwarded to the tenant’s backend service
-
-Downstream responses are returned transparently
-
-Usage logging remains asynchronous
+- API requests are validated and rate-limited
+- Requests are forwarded to the tenant’s backend service
+- Downstream responses are returned transparently
+- Usage logging remains asynchronous
 
 This transforms the system into a minimal API Gateway simulation.
 
-🛠 Tech Stack
+---
 
-Java 17
+## 🛠 Tech Stack
 
-Spring Boot
+- Java 17
+- Spring Boot
+- Spring Security
+- MySQL
+- Redis
+- RabbitMQ
+- Docker
+- AWS EC2
+- GitHub Actions
 
-Spring Security
+---
 
-MySQL
-
-Redis
-
-RabbitMQ
-
-Docker
-
-AWS EC2
-
-GitHub Actions
-
-🎯 Architectural Focus
+## 🎯 Architectural Focus
 
 This project emphasizes:
 
-Multi-tenant backend architecture
+- Clean layered backend architecture
+- Multi-tenant system modeling
+- Subscription-driven traffic governance
+- Infrastructure-level API enforcement
+- Event-driven design patterns
+- Cloud deployment practices
 
-Policy-driven API enforcement
+---
 
-Subscription-based traffic governance
+## 📌 Note
 
-Infrastructure-oriented backend design
+This project is intentionally backend-focused.
+No frontend or UI components are included.
 
-Event-driven processing
-
-Cloud deployment practices
-
-No frontend components are included.
-The platform is designed purely as a backend API management layer.
+---
