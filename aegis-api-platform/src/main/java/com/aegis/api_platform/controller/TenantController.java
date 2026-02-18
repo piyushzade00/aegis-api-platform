@@ -25,7 +25,7 @@ public class TenantController {
     public ResponseEntity<TenantResponse> createTenant(
             @Valid @RequestBody CreateTenantRequest request
     ) {
-        Tenant tenant = tenantService.createTenant(request.name());
+        Tenant tenant = tenantService.createTenant(request.name(), request.subscriptionPlanId());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(tenantMapper.toResponse(tenant));

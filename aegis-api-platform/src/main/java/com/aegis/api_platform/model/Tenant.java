@@ -23,7 +23,12 @@ public class Tenant extends BaseEntity{
     @Column(nullable = false)
     private Status status;
 
-    public Tenant(String name, Status status){
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "subscription_plan_id", nullable = false)
+    private SubscriptionPlan subscriptionPlan;
+
+
+    public Tenant(String name, Status status, SubscriptionPlan subscriptionPlan){
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Tenant name cannot be empty or blank.");
         }
@@ -32,8 +37,13 @@ public class Tenant extends BaseEntity{
             throw new IllegalArgumentException("Tenant status cannot be null.");
         }
 
+        if (subscriptionPlan == null) {
+            throw new IllegalArgumentException("Tenant subscription plan cannot be null.");
+        }
+
         this.name = name;
         this.status = status;
+        this.subscriptionPlan = subscriptionPlan;
     }
 
     public void changeStatus(Status status) {

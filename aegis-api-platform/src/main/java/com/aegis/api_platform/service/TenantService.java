@@ -5,7 +5,7 @@ import com.aegis.api_platform.model.Tenant;
 import java.util.List;
 
 public interface TenantService {
-    Tenant createTenant(String name);
+    Tenant createTenant(String name, Long planId);
 
     Tenant suspendTenant(Long tenantId);
 
