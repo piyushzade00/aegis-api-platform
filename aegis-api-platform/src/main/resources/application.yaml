@@ -16,7 +16,6 @@ spring:
         format_sql: false
         jdbc:
           time_zone: UTC
-    defer-datasource-initialization: true
 
   profiles:
     active: dev

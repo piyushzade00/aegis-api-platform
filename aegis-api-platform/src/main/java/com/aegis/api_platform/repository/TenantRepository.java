@@ -11,4 +11,5 @@ public interface TenantRepository extends JpaRepository<Tenant, Long> {
 
     Optional<Tenant> findByName(String name);
 
+    boolean existsByNameIgnoreCase(String name);
 }
