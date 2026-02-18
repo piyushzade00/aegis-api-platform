@@ -35,4 +35,8 @@ public class Tenant extends BaseEntity{
         this.name = name;
         this.status = status;
     }
+
+    public void changeStatus(Status status) {
+        this.status = status;
+    }
 }
