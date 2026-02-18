@@ -1,7 +1,9 @@
 package com.aegis.api_platform.service.impl;
 
 import com.aegis.api_platform.enums.Status;
+import com.aegis.api_platform.model.SubscriptionPlan;
 import com.aegis.api_platform.model.Tenant;
+import com.aegis.api_platform.repository.SubscriptionPlanRepository;
 import com.aegis.api_platform.repository.TenantRepository;
 import com.aegis.api_platform.service.TenantService;
 import lombok.RequiredArgsConstructor;
@@ -16,14 +18,18 @@ import java.util.List;
 public class TenantServiceImpl implements TenantService {
 
     private final TenantRepository tenantRepository;
+    private final SubscriptionPlanRepository subscriptionPlanRepository;
 
     @Override
-    public Tenant createTenant(String name) {
+    public Tenant createTenant(String name, Long planId) {
         if (tenantRepository.existsByNameIgnoreCase(name.trim())) {
             throw new IllegalArgumentException("Tenant name already exists.");
         }
 
-        Tenant tenant = new Tenant(name.trim(), Status.ACTIVE);
+        SubscriptionPlan plan = subscriptionPlanRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("Subscription plan not found."));
+
+        Tenant tenant = new Tenant(name.trim(), Status.ACTIVE,plan);
         return tenantRepository.save(tenant);
     }
 
