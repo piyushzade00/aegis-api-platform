@@ -49,11 +49,6 @@ public class JwtService {
         return extractClaims(token).getSubject();
     }
 
-    public Long extractTenantId(String token) {
-        Object tenantId = extractClaims(token).get("tenantId");
-        return tenantId != null ? Long.valueOf(tenantId.toString()) : null;
-    }
-
     public String extractRole(String token) {
         return extractClaims(token).get("role", String.class);
     }

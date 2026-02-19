@@ -20,5 +20,5 @@ server:
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 15000
+  expiration: 3600000
 
