@@ -19,19 +19,16 @@ public class ApiDefinitionController {
     private final ApiDefinitionService apiService;
     private final ApiDefinitionMapper mapper;
 
-    // Simulated tenantId for now
-    private static final Long TENANT_ID = 1L;
-
     @PostMapping
     public ApiResponse create(@Valid @RequestBody CreateApiRequest request) {
         return mapper.toResponse(
-                apiService.createApi(TENANT_ID, request)
+                apiService.createApi(request)
         );
     }
 
     @GetMapping
     public List<ApiResponse> getAll() {
-        return apiService.getAllApis(TENANT_ID)
+        return apiService.getAllApis()
                 .stream()
                 .map(mapper::toResponse)
                 .toList();
@@ -40,7 +37,7 @@ public class ApiDefinitionController {
     @GetMapping("/{id}")
     public ApiResponse get(@PathVariable Long id) {
         return mapper.toResponse(
-                apiService.getApi(TENANT_ID, id)
+                apiService.getApi(id)
         );
     }
 
@@ -50,21 +47,21 @@ public class ApiDefinitionController {
             @Valid @RequestBody UpdateApiRequest request
     ) {
         return mapper.toResponse(
-                apiService.updateApi(TENANT_ID, id, request)
+                apiService.updateApi(id, request)
         );
     }
 
     @PatchMapping("/{id}/deactivate")
     public ApiResponse deactivate(@PathVariable Long id) {
         return mapper.toResponse(
-                apiService.deactivateApi(TENANT_ID, id)
+                apiService.deactivateApi(id)
         );
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse delete(@PathVariable Long id) {
         return mapper.toResponse(
-                apiService.deleteApi(TENANT_ID, id)
+                apiService.deleteApi(id)
         );
     }
 }

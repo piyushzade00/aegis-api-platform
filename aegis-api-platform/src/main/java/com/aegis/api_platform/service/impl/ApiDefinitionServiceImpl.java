@@ -8,6 +8,7 @@ import com.aegis.api_platform.model.ApiDefinition;
 import com.aegis.api_platform.model.Tenant;
 import com.aegis.api_platform.repository.ApiDefinitionRepository;
 import com.aegis.api_platform.repository.TenantRepository;
+import com.aegis.api_platform.security.SecurityUtils;
 import com.aegis.api_platform.service.ApiDefinitionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,12 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
 
     private final ApiDefinitionRepository apiRepository;
     private final TenantRepository tenantRepository;
+    private final SecurityUtils securityUtils;
 
     @Override
-    public ApiDefinition createApi(Long tenantId, CreateApiRequest request) {
+    public ApiDefinition createApi(CreateApiRequest request) {
+
+        Long tenantId = securityUtils.getCurrentTenantId();
 
         Tenant tenant = getActiveTenant(tenantId);
 
@@ -50,7 +54,9 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
     }
 
     @Override
-    public ApiDefinition updateApi(Long tenantId, Long apiId, UpdateApiRequest request) {
+    public ApiDefinition updateApi(Long apiId, UpdateApiRequest request) {
+
+        Long tenantId = securityUtils.getCurrentTenantId();
 
         ApiDefinition api = getApiOrThrow(tenantId, apiId);
 
@@ -68,7 +74,9 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
     }
 
     @Override
-    public ApiDefinition deactivateApi(Long tenantId, Long apiId) {
+    public ApiDefinition deactivateApi(Long apiId) {
+
+        Long tenantId = securityUtils.getCurrentTenantId();
 
         ApiDefinition api = getApiOrThrow(tenantId, apiId);
 
@@ -78,7 +86,9 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
     }
 
     @Override
-    public ApiDefinition deleteApi(Long tenantId, Long apiId) {
+    public ApiDefinition deleteApi(Long apiId) {
+
+        Long tenantId = securityUtils.getCurrentTenantId();
 
         ApiDefinition api = getApiOrThrow(tenantId, apiId);
 
@@ -89,7 +99,10 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ApiDefinition> getAllApis(Long tenantId) {
+    public List<ApiDefinition> getAllApis() {
+
+        Long tenantId = securityUtils.getCurrentTenantId();
+
         return apiRepository.findAllByTenantIdAndStatusNot(
                 tenantId,
                 ApiStatus.DELETED
@@ -98,7 +111,10 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
 
     @Override
     @Transactional(readOnly = true)
-    public ApiDefinition getApi(Long tenantId, Long apiId) {
+    public ApiDefinition getApi(Long apiId) {
+
+        Long tenantId = securityUtils.getCurrentTenantId();
+
         return getApiOrThrow(tenantId, apiId);
     }
 
@@ -108,6 +124,14 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
 
         Tenant tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Tenant not found."));
+
+        if (tenant.getStatus() == Status.DELETED) {
+            throw new IllegalStateException("Deleted tenant cannot perform operations.");
+        }
+
+        if (tenant.getStatus() == Status.SUSPENDED) {
+            throw new IllegalStateException("Suspended tenant cannot perform operations.");
+        }
 
         if (tenant.getStatus() != Status.ACTIVE)
             throw new IllegalStateException("Tenant is not active.");

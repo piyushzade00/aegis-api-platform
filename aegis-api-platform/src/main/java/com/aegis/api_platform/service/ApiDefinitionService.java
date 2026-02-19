@@ -8,15 +8,15 @@ import java.util.List;
 
 public interface ApiDefinitionService {
 
-    ApiDefinition createApi(Long tenantId, CreateApiRequest request);
+    ApiDefinition createApi(CreateApiRequest request);
 
-    ApiDefinition updateApi(Long tenantId, Long apiId, UpdateApiRequest request);
+    ApiDefinition updateApi(Long apiId, UpdateApiRequest request);
 
-    ApiDefinition deactivateApi(Long tenantId, Long apiId);
+    ApiDefinition deactivateApi(Long apiId);
 
-    ApiDefinition deleteApi(Long tenantId, Long apiId);
+    ApiDefinition deleteApi(Long apiId);
 
-    List<ApiDefinition> getAllApis(Long tenantId);
+    List<ApiDefinition> getAllApis();
 
-    ApiDefinition getApi(Long tenantId, Long apiId);
+    ApiDefinition getApi(Long apiId);
 }
