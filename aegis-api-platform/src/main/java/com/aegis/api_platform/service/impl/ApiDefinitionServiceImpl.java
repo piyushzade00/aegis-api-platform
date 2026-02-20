@@ -3,6 +3,7 @@ package com.aegis.api_platform.service.impl;
 import com.aegis.api_platform.dto.request.CreateApiRequest;
 import com.aegis.api_platform.dto.request.UpdateApiRequest;
 import com.aegis.api_platform.enums.ApiStatus;
+import com.aegis.api_platform.enums.HttpMethod;
 import com.aegis.api_platform.enums.Status;
 import com.aegis.api_platform.model.ApiDefinition;
 import com.aegis.api_platform.model.Tenant;
@@ -118,6 +119,25 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
         return getApiOrThrow(tenantId, apiId);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ApiDefinition resolveApi(String path, String method) {
+
+        String normalizedPath = normalizePath(path);
+
+        HttpMethod httpMethod = HttpMethod.valueOf(method.toUpperCase().trim());
+
+        ApiDefinition api = apiRepository
+                .findByPathAndHttpMethodAndStatus(normalizedPath, httpMethod, ApiStatus.ACTIVE)
+                .orElseThrow(() -> new IllegalArgumentException("API not found"));
+
+        if (api.getTenant().getStatus() != Status.ACTIVE) {
+            throw new IllegalStateException("Tenant is not active");
+        }
+
+        return api;
+    }
+
     // -------- PRIVATE METHODS ----------
 
     private Tenant getActiveTenant(Long tenantId) {
@@ -148,5 +168,19 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
             throw new IllegalStateException("API does not belong to this tenant.");
 
         return api;
+    }
+
+    private String normalizePath(String path) {
+        if (path == null || path.isBlank()) {
+            throw new IllegalArgumentException("Invalid path");
+        }
+
+        String cleaned = path.trim();
+
+        if (!cleaned.startsWith("/")) {
+            cleaned = "/" + cleaned;
+        }
+
+        return cleaned;
     }
 }

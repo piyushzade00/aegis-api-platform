@@ -82,7 +82,7 @@ public class ApiDefinition extends BaseEntity {
     }
 
     public void activate() {
-        this.status = ApiStatus.INACTIVE;
+        this.status = ApiStatus.ACTIVE;
     }
 
     public void deprecate() {
