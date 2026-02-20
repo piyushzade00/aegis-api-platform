@@ -121,14 +121,18 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
 
     @Override
     @Transactional(readOnly = true)
-    public ApiDefinition resolveApi(String path, String method) {
+    public ApiDefinition resolveApi(Long tenantId, String path, String method) {
 
         String normalizedPath = normalizePath(path);
 
         HttpMethod httpMethod = HttpMethod.valueOf(method.toUpperCase().trim());
 
         ApiDefinition api = apiRepository
-                .findByPathAndHttpMethodAndStatus(normalizedPath, httpMethod, ApiStatus.ACTIVE)
+                .findByTenantIdAndPathAndHttpMethodAndStatus(
+                        tenantId,
+                        normalizedPath,
+                        httpMethod,
+                        ApiStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalArgumentException("API not found"));
 
         if (api.getTenant().getStatus() != Status.ACTIVE) {

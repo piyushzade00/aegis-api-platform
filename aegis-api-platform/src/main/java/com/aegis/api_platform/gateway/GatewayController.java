@@ -25,13 +25,15 @@ public class GatewayController {
     public ResponseEntity<String> handleGateway(HttpServletRequest request,
                                                 @RequestBody(required = false) String body) {
 
+        Long tenantId = (Long) request.getAttribute("tenantId");
+
         String fullPath = request.getRequestURI().replace("/gateway", "");
         String method = request.getMethod();
 
         // Remove /gateway prefix
         String path = fullPath.replaceFirst("/gateway", "");
 
-        ApiDefinition api = apiDefinitionService.resolveApi(path, method);
+        ApiDefinition api = apiDefinitionService.resolveApi(tenantId, path, method);
 
         WebClient.RequestBodySpec requestSpec =
                 webClient.method(HttpMethod.valueOf(method))
