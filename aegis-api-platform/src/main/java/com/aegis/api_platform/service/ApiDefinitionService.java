@@ -19,4 +19,6 @@ public interface ApiDefinitionService {
     List<ApiDefinition> getAllApis();
 
     ApiDefinition getApi(Long apiId);
+
+    ApiDefinition resolveApi(String path, String method);
 }

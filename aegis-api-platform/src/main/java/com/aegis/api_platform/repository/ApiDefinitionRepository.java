@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ApiDefinitionRepository extends JpaRepository<ApiDefinition, Long> {
@@ -23,4 +24,9 @@ public interface ApiDefinitionRepository extends JpaRepository<ApiDefinition, Lo
             Long tenantId,
             ApiStatus status
     );
+
+    Optional<ApiDefinition> findByPathAndHttpMethodAndStatus(String path,
+                                                             HttpMethod httpMethod,
+                                                             ApiStatus status);
+
 }
