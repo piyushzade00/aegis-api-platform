@@ -1,6 +1,7 @@
 package com.aegis.api_platform.service.impl;
 
 import com.aegis.api_platform.exception.MonthlyQuotaExceededException;
+import com.aegis.api_platform.repository.UsageLogRepository;
 import com.aegis.api_platform.service.QuotaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 public class QuotaServiceImpl implements QuotaService {
 
     private final StringRedisTemplate redisTemplate;
+    private final UsageLogRepository usageLogRepository;
 
     @Override
     public void checkMonthlyQuota(Long tenantId,
@@ -23,11 +25,30 @@ public class QuotaServiceImpl implements QuotaService {
 
         String key = buildKey(tenantId);
 
-        Long currentCount = redisTemplate.opsForValue().increment(key);
+        String currentMonth = YearMonth.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMM"));
 
-        if (currentCount == 1) {
-            redisTemplate.expire(key, Duration.ofDays(31));
+        Boolean exists = redisTemplate.hasKey(key);
+
+        if (!exists) {
+            Long countFromDb =
+                    usageLogRepository.countByTenantAndMonth(
+                            tenantId,
+                            currentMonth
+                    );
+
+            if (countFromDb == null) {
+                countFromDb = 0L;
+            }
+
+            redisTemplate.opsForValue().set(
+                    key,
+                    String.valueOf(countFromDb),
+                    Duration.ofDays(31)
+            );
         }
+
+        Long currentCount = redisTemplate.opsForValue().increment(key);
 
         if (currentCount != null && currentCount > allowedMonthlyQuota) {
             throw new MonthlyQuotaExceededException("Monthly quota exceeded");

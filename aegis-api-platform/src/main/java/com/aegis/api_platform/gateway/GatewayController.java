@@ -1,5 +1,7 @@
 package com.aegis.api_platform.gateway;
 
+import com.aegis.api_platform.messaging.event.UsageEvent;
+import com.aegis.api_platform.messaging.publisher.UsageEventPublisher;
 import com.aegis.api_platform.model.ApiDefinition;
 import com.aegis.api_platform.service.ApiDefinitionService;
 import com.aegis.api_platform.service.QuotaService;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Instant;
 import java.util.Collections;
 
 @RestController
@@ -24,6 +27,7 @@ public class GatewayController {
     private final WebClient webClient;
     private final RateLimitService rateLimitService;
     private final QuotaService quotaService;
+    private final UsageEventPublisher usageEventPublisher;
 
     @RequestMapping("/**")
     public ResponseEntity<String> handleGateway(HttpServletRequest request,
@@ -84,6 +88,24 @@ public class GatewayController {
             responseSpec = requestSpec.retrieve();
         }
 
-        return responseSpec.toEntity(String.class).block();
+        long start = System.currentTimeMillis();
+
+        //Forward Request
+        ResponseEntity<String> response =  responseSpec.toEntity(String.class).block();
+
+        long latency = System.currentTimeMillis() - start;
+
+        usageEventPublisher.publish(
+                new UsageEvent(
+                        tenantId,
+                        api.getId(),
+                        (Long) request.getAttribute("apiKeyId"),
+                        response.getStatusCodeValue(),
+                        latency,
+                        Instant.now()
+                )
+        );
+
+        return response;
     }
 }
