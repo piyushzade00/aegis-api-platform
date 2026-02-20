@@ -25,8 +25,11 @@ public interface ApiDefinitionRepository extends JpaRepository<ApiDefinition, Lo
             ApiStatus status
     );
 
-    Optional<ApiDefinition> findByPathAndHttpMethodAndStatus(String path,
-                                                             HttpMethod httpMethod,
-                                                             ApiStatus status);
+    Optional<ApiDefinition> findByTenantIdAndPathAndHttpMethodAndStatus(
+            Long tenantId,
+            String path,
+            HttpMethod httpMethod,
+            ApiStatus status
+    );
 
 }

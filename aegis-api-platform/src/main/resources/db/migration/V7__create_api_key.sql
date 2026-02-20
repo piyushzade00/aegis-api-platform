@@ -1,0 +1,13 @@
+CREATE TABLE api_key (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    tenant_id BIGINT NOT NULL,
+    hashed_key VARCHAR(128) NOT NULL UNIQUE,
+    status VARCHAR(20) NOT NULL,
+    expires_at TIMESTAMP NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_api_key_tenant
+        FOREIGN KEY (tenant_id)
+        REFERENCES tenant(id)
+);

@@ -1,0 +1,14 @@
+package com.aegis.api_platform.repository;
+
+import com.aegis.api_platform.enums.ApiKeyStatus;
+import com.aegis.api_platform.model.ApiKey;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface ApiKeyRepository extends JpaRepository<ApiKey, Long> {
+
+    Optional<ApiKey> findByHashedKeyAndStatus(String hashedKey, ApiKeyStatus status);
+}

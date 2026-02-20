@@ -20,5 +20,5 @@ public interface ApiDefinitionService {
 
     ApiDefinition getApi(Long apiId);
 
-    ApiDefinition resolveApi(String path, String method);
+    ApiDefinition resolveApi(Long tenantId, String path, String method);
 }
