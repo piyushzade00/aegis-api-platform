@@ -2,6 +2,7 @@ package com.aegis.api_platform.gateway;
 
 import com.aegis.api_platform.model.ApiDefinition;
 import com.aegis.api_platform.service.ApiDefinitionService;
+import com.aegis.api_platform.service.RateLimitService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
@@ -20,6 +21,7 @@ public class GatewayController {
 
     private final ApiDefinitionService apiDefinitionService;
     private final WebClient webClient;
+    private final RateLimitService rateLimitService;
 
     @RequestMapping("/**")
     public ResponseEntity<String> handleGateway(HttpServletRequest request,
@@ -35,6 +37,19 @@ public class GatewayController {
 
         ApiDefinition api = apiDefinitionService.resolveApi(tenantId, path, method);
 
+        // Check rate limit
+        Integer allowedPerMinute =
+                api.getTenant()
+                        .getSubscriptionPlan()
+                        .getRateLimitPerMinute();
+
+        rateLimitService.checkRateLimit(
+                tenantId,
+                api.getId(),
+                allowedPerMinute
+        );
+
+        //Forward request to target URL
         WebClient.RequestBodySpec requestSpec =
                 webClient.method(HttpMethod.valueOf(method))
                         .uri(api.getTargetUrl());
