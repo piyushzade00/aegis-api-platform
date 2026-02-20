@@ -3,9 +3,9 @@ package com.aegis.api_platform.gateway;
 import com.aegis.api_platform.messaging.event.UsageEvent;
 import com.aegis.api_platform.messaging.publisher.UsageEventPublisher;
 import com.aegis.api_platform.model.ApiDefinition;
-import com.aegis.api_platform.service.ApiDefinitionService;
-import com.aegis.api_platform.service.QuotaService;
-import com.aegis.api_platform.service.RateLimitService;
+import com.aegis.api_platform.model.PlanApiConfig;
+import com.aegis.api_platform.policy.ApiPolicy;
+import com.aegis.api_platform.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
@@ -17,6 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/gateway")
@@ -28,6 +29,8 @@ public class GatewayController {
     private final RateLimitService rateLimitService;
     private final QuotaService quotaService;
     private final UsageEventPublisher usageEventPublisher;
+    private final PlanApiConfigService planApiConfigService;
+    private final PolicyResolverService policyResolverService;
 
     @RequestMapping("/**")
     public ResponseEntity<String> handleGateway(HttpServletRequest request,
@@ -43,28 +46,24 @@ public class GatewayController {
 
         ApiDefinition api = apiDefinitionService.resolveApi(tenantId, path, method);
 
-        // Check rate limit
-        Integer allowedPerMinute =
-                api.getTenant()
-                        .getSubscriptionPlan()
-                        .getRateLimitPerMinute();
+        // Check rate limit and quota based on plan and overrides
+        Long planId = api.getTenant().getSubscriptionPlan().getId();
 
+        ApiPolicy policy =
+                policyResolverService.resolve(planId, api);
+
+        //Enforce rate check
         rateLimitService.checkRateLimit(
                 tenantId,
                 api.getId(),
-                allowedPerMinute
+                policy.getRateLimitPerMinute()
         );
 
-        //Monthly Quota check
-        Long allowedMonthly =
-                api.getTenant()
-                        .getSubscriptionPlan()
-                        .getMonthlyQuota();
-
+        //Enforce Monthly Quota check
         quotaService.checkMonthlyQuota(
                 tenantId,
                 api.getId(),
-                allowedMonthly
+                policy.getMonthlyQuota()
         );
 
         //Forward request to target URL
