@@ -2,6 +2,7 @@ package com.aegis.api_platform.gateway;
 
 import com.aegis.api_platform.model.ApiDefinition;
 import com.aegis.api_platform.service.ApiDefinitionService;
+import com.aegis.api_platform.service.QuotaService;
 import com.aegis.api_platform.service.RateLimitService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class GatewayController {
     private final ApiDefinitionService apiDefinitionService;
     private final WebClient webClient;
     private final RateLimitService rateLimitService;
+    private final QuotaService quotaService;
 
     @RequestMapping("/**")
     public ResponseEntity<String> handleGateway(HttpServletRequest request,
@@ -47,6 +49,18 @@ public class GatewayController {
                 tenantId,
                 api.getId(),
                 allowedPerMinute
+        );
+
+        //Monthly Quota check
+        Long allowedMonthly =
+                api.getTenant()
+                        .getSubscriptionPlan()
+                        .getMonthlyQuota();
+
+        quotaService.checkMonthlyQuota(
+                tenantId,
+                api.getId(),
+                allowedMonthly
         );
 
         //Forward request to target URL

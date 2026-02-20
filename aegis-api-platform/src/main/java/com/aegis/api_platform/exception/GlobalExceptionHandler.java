@@ -33,4 +33,14 @@ public class GlobalExceptionHandler {
                         "message", ex.getMessage()
                 ));
     }
+
+    @ExceptionHandler(MonthlyQuotaExceededException.class)
+    public ResponseEntity<?> handleQuota(MonthlyQuotaExceededException ex) {
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(Map.of(
+                        "error", "MONTHLY_QUOTA_EXCEEDED",
+                        "message", ex.getMessage()
+                ));
+    }
 }
