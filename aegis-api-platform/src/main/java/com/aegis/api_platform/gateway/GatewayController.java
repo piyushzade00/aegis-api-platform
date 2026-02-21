@@ -3,7 +3,6 @@ package com.aegis.api_platform.gateway;
 import com.aegis.api_platform.messaging.event.UsageEvent;
 import com.aegis.api_platform.messaging.publisher.UsageEventPublisher;
 import com.aegis.api_platform.model.ApiDefinition;
-import com.aegis.api_platform.model.PlanApiConfig;
 import com.aegis.api_platform.policy.ApiPolicy;
 import com.aegis.api_platform.service.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +16,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
 import java.util.Collections;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/gateway")
@@ -29,8 +27,8 @@ public class GatewayController {
     private final RateLimitService rateLimitService;
     private final QuotaService quotaService;
     private final UsageEventPublisher usageEventPublisher;
-    private final PlanApiConfigService planApiConfigService;
     private final PolicyResolverService policyResolverService;
+    private final BackendCallerService backendCallerService;
 
     @RequestMapping("/**")
     public ResponseEntity<String> handleGateway(HttpServletRequest request,
@@ -90,7 +88,7 @@ public class GatewayController {
         long start = System.currentTimeMillis();
 
         //Forward Request
-        ResponseEntity<String> response =  responseSpec.toEntity(String.class).block();
+        ResponseEntity<String> response =  backendCallerService.call(responseSpec);
 
         long latency = System.currentTimeMillis() - start;
 
