@@ -16,7 +16,6 @@ public class ApiDefinitionMapper {
                 api.getHttpMethod(),
                 api.getTargetUrl(),
                 api.getDescription(),
-                api.isPublic(),
                 api.getStatus(),
                 api.getCreatedAt(),
                 api.getUpdatedAt()

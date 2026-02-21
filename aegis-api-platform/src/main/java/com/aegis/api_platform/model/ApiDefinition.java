@@ -40,9 +40,6 @@ public class ApiDefinition extends BaseEntity {
     @Column(length = 500)
     private String description;
 
-    @Column(nullable = false)
-    private boolean isPublic;
-
     @Column(name = "target_url", nullable = false, length = 500)
     private String targetUrl;
 
@@ -56,8 +53,7 @@ public class ApiDefinition extends BaseEntity {
             String path,
             HttpMethod httpMethod,
             String targetUrl,
-            String description,
-            boolean isPublic
+            String description
     ) {
         if (tenant == null)
             throw new IllegalArgumentException("Tenant is required");
@@ -73,7 +69,6 @@ public class ApiDefinition extends BaseEntity {
         this.description = description;
         this.targetUrl = targetUrl.trim();
         this.status = ApiStatus.ACTIVE;
-        this.isPublic = isPublic;
     }
 
     public void deactivate() {
@@ -92,7 +87,7 @@ public class ApiDefinition extends BaseEntity {
         this.status = ApiStatus.DELETED;
     }
 
-    public void updateDetails(String name, String description, boolean isPublic,String targetUrl) {
+    public void updateDetails(String name, String description, String targetUrl) {
 
         if (name == null || name.isBlank())
             throw new IllegalArgumentException("API name cannot be blank");
@@ -102,7 +97,6 @@ public class ApiDefinition extends BaseEntity {
 
         this.name = name.trim();
         this.description = description;
-        this.isPublic = isPublic;
         this.targetUrl = targetUrl.trim();
     }
 }

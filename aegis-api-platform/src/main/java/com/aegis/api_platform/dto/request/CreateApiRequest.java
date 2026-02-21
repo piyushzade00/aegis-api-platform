@@ -23,7 +23,5 @@ public record CreateApiRequest(
         )
         String targetUrl,
 
-        String description,
-
-        boolean isPublic
+        String description
 ) {}

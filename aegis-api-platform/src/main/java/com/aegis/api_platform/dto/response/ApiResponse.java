@@ -13,7 +13,6 @@ public record ApiResponse(
         HttpMethod httpMethod,
         String targetUrl,
         String description,
-        boolean isPublic,
         ApiStatus status,
         Instant createdAt,
         Instant updatedAt

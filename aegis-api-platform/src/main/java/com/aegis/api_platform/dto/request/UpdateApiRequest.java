@@ -15,7 +15,5 @@ public record UpdateApiRequest(
         )
         String targetUrl,
 
-        String description,
-
-        boolean isPublic
+        String description
 ) {}

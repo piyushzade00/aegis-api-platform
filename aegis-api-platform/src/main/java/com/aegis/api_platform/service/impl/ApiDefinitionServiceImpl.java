@@ -47,8 +47,7 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
                 request.path(),
                 request.httpMethod(),
                 request.targetUrl(),
-                request.description(),
-                request.isPublic()
+                request.description()
         );
 
         return apiRepository.save(api);
@@ -67,7 +66,6 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
         api.updateDetails(
                 request.name(),
                 request.description(),
-                request.isPublic(),
                 request.targetUrl()
         );
 
