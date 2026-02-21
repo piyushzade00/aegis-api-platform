@@ -10,6 +10,7 @@ import com.aegis.api_platform.repository.UsageLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -53,14 +54,21 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     @Override
     public QuotaAnalyticsResponse getQuotaStatus(Long tenantId) {
 
-        String currentMonth =
-                YearMonth.now()
-                        .format(DateTimeFormatter.ofPattern("yyyyMM"));
+        YearMonth currentMonth = YearMonth.now();
+
+        LocalDateTime start =
+                currentMonth.atDay(1).atStartOfDay();
+
+        LocalDateTime end =
+                currentMonth.plusMonths(1)
+                        .atDay(1)
+                        .atStartOfDay();
 
         Long used =
                 usageLogRepository.countMonthlyUsage(
                         tenantId,
-                        currentMonth
+                        start,
+                        end
                 );
 
         if (used == null) {

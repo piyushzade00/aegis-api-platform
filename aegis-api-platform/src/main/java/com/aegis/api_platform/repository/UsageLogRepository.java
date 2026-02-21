@@ -13,14 +13,14 @@ import java.util.List;
 @Repository
 public interface UsageLogRepository extends JpaRepository<UsageLog, Long> {
 
-    @Query("""
-           SELECT COUNT(u)
-           FROM UsageLog u
-           WHERE u.tenantId = :tenantId
-           AND FUNCTION('DATE_FORMAT', u.createdAt, '%Y%m') = :yearMonth
-           """)
-    Long countByTenantAndMonth(@Param("tenantId") Long tenantId,
-                               @Param("yearMonth") String yearMonth);
+//    @Query("""
+//           SELECT COUNT(u)
+//           FROM UsageLog u
+//           WHERE u.tenantId = :tenantId
+//           AND FUNCTION('DATE_FORMAT', u.createdAt, '%Y%m') = :yearMonth
+//           """)
+//    Long countByTenantAndMonth(@Param("tenantId") Long tenantId,
+//                               @Param("yearMonth") String yearMonth);
 
     @Query("""
        SELECT COUNT(u)
@@ -52,14 +52,27 @@ public interface UsageLogRepository extends JpaRepository<UsageLog, Long> {
             @Param("tenantId") Long tenantId
     );
 
+//    @Query("""
+//       SELECT COUNT(u)
+//       FROM UsageLog u
+//       WHERE u.tenantId = :tenantId
+//       AND FUNCTION('DATE_FORMAT', u.createdAt, '%Y%m') = :yearMonth
+//       """)
+//    Long countMonthlyUsage(
+//            @Param("tenantId") Long tenantId,
+//            @Param("yearMonth") String yearMonth
+//    );
+
     @Query("""
-       SELECT COUNT(u)
-       FROM UsageLog u
-       WHERE u.tenantId = :tenantId
-       AND FUNCTION('DATE_FORMAT', u.createdAt, '%Y%m') = :yearMonth
-       """)
+   SELECT COUNT(u)
+   FROM UsageLog u
+   WHERE u.tenantId = :tenantId
+   AND u.createdAt >= :start
+   AND u.createdAt < :end
+   """)
     Long countMonthlyUsage(
             @Param("tenantId") Long tenantId,
-            @Param("yearMonth") String yearMonth
+            @Param("start") java.time.LocalDateTime start,
+            @Param("end") java.time.LocalDateTime end
     );
 }

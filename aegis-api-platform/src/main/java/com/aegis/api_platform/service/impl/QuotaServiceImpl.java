@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 
@@ -25,16 +26,24 @@ public class QuotaServiceImpl implements QuotaService {
 
         String key = buildKey(tenantId);
 
-        String currentMonth = YearMonth.now()
-                .format(DateTimeFormatter.ofPattern("yyyyMM"));
-
         Boolean exists = redisTemplate.hasKey(key);
 
         if (!exists) {
+            YearMonth currentMonth = YearMonth.now();
+
+            LocalDateTime start =
+                    currentMonth.atDay(1).atStartOfDay();
+
+            LocalDateTime end =
+                    currentMonth.plusMonths(1)
+                            .atDay(1)
+                            .atStartOfDay();
+
             Long countFromDb =
-                    usageLogRepository.countByTenantAndMonth(
+                    usageLogRepository.countMonthlyUsage(
                             tenantId,
-                            currentMonth
+                            start,
+                            end
                     );
 
             if (countFromDb == null) {
