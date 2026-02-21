@@ -5,8 +5,10 @@ import com.aegis.api_platform.exception.RateLimitExceededException;
 import com.aegis.api_platform.exception.model.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.MDC;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -95,6 +97,36 @@ public class GlobalExceptionHandler {
         return buildResponse(
                 HttpStatus.BAD_REQUEST,
                 "VALIDATION_ERROR",
+                message,
+                request
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request
+    ) {
+
+        String message = "Data integrity violation";
+
+        if (ex.getRootCause() != null) {
+            String rootMessage = ex.getRootCause().getMessage();
+
+            if (rootMessage.contains("uk_plan_api")) {
+                message = "Plan already has configuration for this API";
+            } else if (rootMessage.contains("uk_api_definition")) {
+                message = "API with same path and method already exists";
+            } else if (rootMessage.contains("plan_code")) {
+                message = "Plan code already exists";
+            } else if (rootMessage.contains("email")) {
+                message = "Email already exists";
+            }
+        }
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "DB_CONSTRAINT_VIOLATION",
                 message,
                 request
         );
