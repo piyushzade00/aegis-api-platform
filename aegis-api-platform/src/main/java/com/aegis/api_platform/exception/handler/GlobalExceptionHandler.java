@@ -1,6 +1,8 @@
-package com.aegis.api_platform.exception;
+package com.aegis.api_platform.exception.handler;
 
-import com.aegis.api_platform.dto.response.ApiErrorResponse;
+import com.aegis.api_platform.exception.model.ApiErrorResponse;
+import com.aegis.api_platform.exception.MonthlyQuotaExceededException;
+import com.aegis.api_platform.exception.RateLimitExceededException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
-import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

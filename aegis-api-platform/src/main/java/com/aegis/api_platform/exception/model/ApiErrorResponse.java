@@ -1,4 +1,4 @@
-package com.aegis.api_platform.dto.response;
+package com.aegis.api_platform.exception.model;
 
 import lombok.Builder;
 import lombok.Getter;
