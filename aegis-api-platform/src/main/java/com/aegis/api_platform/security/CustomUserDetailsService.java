@@ -1,6 +1,5 @@
 package com.aegis.api_platform.security;
 
-import com.aegis.api_platform.model.AppUser;
 import com.aegis.api_platform.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

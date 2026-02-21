@@ -1,8 +1,8 @@
 package com.aegis.api_platform.exception.handler;
 
-import com.aegis.api_platform.exception.model.ApiErrorResponse;
 import com.aegis.api_platform.exception.MonthlyQuotaExceededException;
 import com.aegis.api_platform.exception.RateLimitExceededException;
+import com.aegis.api_platform.exception.model.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
