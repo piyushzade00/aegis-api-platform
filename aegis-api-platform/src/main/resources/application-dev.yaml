@@ -33,3 +33,13 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: 3600000
 
+management:
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    io.github.resilience4j: DEBUG
+    org.springframework.amqp: DEBUG

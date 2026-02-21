@@ -1,6 +1,9 @@
 spring:
   application:
-    name: Aegis API Platform
+    name: aegis-api-platform
+
+  profiles:
+    active: dev
 
   flyway:
     enabled: true
@@ -17,22 +20,17 @@ spring:
         jdbc:
           time_zone: UTC
 
-  profiles:
-    active: dev
-
 server:
   port: 8080
 
-logging:
-  level:
-    root: INFO
-    org.springframework.web: INFO
-    org.flywaydb: INFO
-    org.springframework.boot.context.config: DEBUG
-    io.github.resilience4j: DEBUG
-    org.springframework.amqp: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId}] %-5level %logger - %msg%n"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
 
 resilience4j:
   circuitbreaker:
