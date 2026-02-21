@@ -1,5 +1,6 @@
 package com.aegis.api_platform.gateway;
 
+import com.aegis.api_platform.common.CorrelationIdFilter;
 import com.aegis.api_platform.messaging.event.UsageEvent;
 import com.aegis.api_platform.messaging.publisher.UsageEventPublisher;
 import com.aegis.api_platform.model.ApiDefinition;
@@ -7,6 +8,7 @@ import com.aegis.api_platform.policy.ApiPolicy;
 import com.aegis.api_platform.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -77,6 +79,12 @@ public class GatewayController {
                     }
                 });
 
+        // Force correlation header
+        requestSpec.header(
+                CorrelationIdFilter.HEADER_NAME,
+                MDC.get(CorrelationIdFilter.CORRELATION_ID)
+        );
+
         WebClient.ResponseSpec responseSpec;
 
         if (body != null && !body.isBlank()) {
@@ -99,7 +107,8 @@ public class GatewayController {
                         (Long) request.getAttribute("apiKeyId"),
                         response.getStatusCodeValue(),
                         latency,
-                        Instant.now()
+                        Instant.now(),
+                        MDC.get(CorrelationIdFilter.CORRELATION_ID)
                 )
         );
 

@@ -8,5 +8,6 @@ public record UsageEvent(
         Long apiKeyId,
         int statusCode,
         long latencyMs,
-        Instant timestamp
+        Instant timestamp,
+        String correlationId
 ) {}

@@ -5,6 +5,7 @@ import com.aegis.api_platform.messaging.event.UsageEvent;
 import com.aegis.api_platform.model.UsageLog;
 import com.aegis.api_platform.repository.UsageLogRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -17,14 +18,21 @@ public class UsageEventConsumer {
     @RabbitListener(queues = RabbitConfig.USAGE_QUEUE,
             containerFactory = "rabbitListenerContainerFactory")
     public void consume(UsageEvent event) {
-        UsageLog log = new UsageLog(
-                event.tenantId(),
-                event.apiId(),
-                event.apiKeyId(),
-                event.statusCode(),
-                event.latencyMs()
-        );
 
-        usageLogRepository.save(log);
+        MDC.put("correlationId", event.correlationId());
+
+        try {
+            UsageLog log = new UsageLog(
+                    event.tenantId(),
+                    event.apiId(),
+                    event.apiKeyId(),
+                    event.statusCode(),
+                    event.latencyMs()
+            );
+
+            usageLogRepository.save(log);
+        }finally {
+            MDC.clear();
+        }
     }
 }
