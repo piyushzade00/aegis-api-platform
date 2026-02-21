@@ -14,7 +14,8 @@ public class UsageEventConsumer {
 
     private final UsageLogRepository usageLogRepository;
 
-    @RabbitListener(queues = RabbitConfig.USAGE_QUEUE)
+    @RabbitListener(queues = RabbitConfig.USAGE_QUEUE,
+            containerFactory = "rabbitListenerContainerFactory")
     public void consume(UsageEvent event) {
         UsageLog log = new UsageLog(
                 event.tenantId(),

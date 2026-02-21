@@ -30,6 +30,7 @@ logging:
     org.flywaydb: INFO
     org.springframework.boot.context.config: DEBUG
     io.github.resilience4j: DEBUG
+    org.springframework.amqp: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId}] %-5level %logger - %msg%n"
 
