@@ -2,6 +2,7 @@ package com.aegis.api_platform.model;
 
 import com.aegis.api_platform.enums.ApiStatus;
 import com.aegis.api_platform.enums.HttpMethod;
+import com.aegis.api_platform.util.PathNormalizer;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -64,12 +65,10 @@ public class ApiDefinition extends BaseEntity {
         if (name == null || name.isBlank())
             throw new IllegalArgumentException("API name cannot be blank");
 
-        if (path == null || !path.startsWith("/"))
-            throw new IllegalArgumentException("Path must start with '/'");
 
         this.tenant = tenant;
         this.name = name.trim();
-        this.path = path.trim();
+        this.path = PathNormalizer.normalize(path);
         this.httpMethod = httpMethod;
         this.description = description;
         this.targetUrl = targetUrl.trim();
