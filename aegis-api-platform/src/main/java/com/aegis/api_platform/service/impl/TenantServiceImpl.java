@@ -29,6 +29,10 @@ public class TenantServiceImpl implements TenantService {
         SubscriptionPlan plan = subscriptionPlanRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("Subscription plan not found."));
 
+        if (plan.getStatus() == Status.ARCHIVED) {
+            throw new IllegalStateException("Archived plan cannot be assigned");
+        }
+
         Tenant tenant = new Tenant(name.trim(), Status.ACTIVE,plan);
         return tenantRepository.save(tenant);
     }
