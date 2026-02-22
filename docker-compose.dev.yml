@@ -1,0 +1,18 @@
+services:
+
+  mysql:
+    ports:
+      - "3307:3306"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  app:
+    ports:
+      - "8080:8080"
