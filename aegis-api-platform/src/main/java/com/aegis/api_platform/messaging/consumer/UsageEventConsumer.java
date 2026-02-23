@@ -32,7 +32,7 @@ public class UsageEventConsumer {
 
             usageLogRepository.save(log);
         }finally {
-            MDC.clear();
+            MDC.remove("correlationId");
         }
     }
 }

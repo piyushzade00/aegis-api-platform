@@ -13,15 +13,6 @@ import java.util.List;
 @Repository
 public interface UsageLogRepository extends JpaRepository<UsageLog, Long> {
 
-//    @Query("""
-//           SELECT COUNT(u)
-//           FROM UsageLog u
-//           WHERE u.tenantId = :tenantId
-//           AND FUNCTION('DATE_FORMAT', u.createdAt, '%Y%m') = :yearMonth
-//           """)
-//    Long countByTenantAndMonth(@Param("tenantId") Long tenantId,
-//                               @Param("yearMonth") String yearMonth);
-
     @Query("""
        SELECT COUNT(u)
        FROM UsageLog u
