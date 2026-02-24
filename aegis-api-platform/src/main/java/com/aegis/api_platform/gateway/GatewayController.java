@@ -12,6 +12,7 @@ import com.aegis.api_platform.service.RateLimitService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -78,7 +79,7 @@ public class GatewayController {
         // Forward headers
         Collections.list(request.getHeaderNames())
                 .forEach(header ->{
-                    if (!header.equalsIgnoreCase("host")) {
+                    if (!isBlockedHeader(header)) {
                         requestSpec.header(header, request.getHeader(header));
                     }
                 });
@@ -120,5 +121,14 @@ public class GatewayController {
         );
 
         return response;
+    }
+
+    private boolean isBlockedHeader(String header) {
+
+        return header.equalsIgnoreCase(HttpHeaders.HOST)
+                || header.equalsIgnoreCase(HttpHeaders.AUTHORIZATION)
+                || header.equalsIgnoreCase(HttpHeaders.COOKIE)
+                || header.equalsIgnoreCase(HttpHeaders.CONTENT_LENGTH)
+                || header.toLowerCase().startsWith("x-forwarded");
     }
 }

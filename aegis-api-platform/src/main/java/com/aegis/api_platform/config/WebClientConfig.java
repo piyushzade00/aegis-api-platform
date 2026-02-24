@@ -1,5 +1,6 @@
 package com.aegis.api_platform.config;
 
+import io.netty.channel.ChannelOption;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -15,7 +16,8 @@ public class WebClientConfig {
     public WebClient webClient() {
 
         HttpClient httpClient = HttpClient.create()
-                .responseTimeout(Duration.ofSeconds(3));
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
+                .responseTimeout(Duration.ofSeconds(5));
 
         return WebClient.builder()
                 .clientConnector(
