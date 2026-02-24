@@ -5,5 +5,5 @@ import com.aegis.api_platform.policy.ApiPolicy;
 
 public interface PolicyResolverService {
 
-    ApiPolicy resolve(Long planId, ApiDefinition api);
+    ApiPolicy resolve(Long planId, Long apiId);
 }

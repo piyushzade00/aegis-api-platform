@@ -2,7 +2,9 @@ package com.aegis.api_platform.service.impl;
 
 import com.aegis.api_platform.model.ApiDefinition;
 import com.aegis.api_platform.model.PlanApiConfig;
+import com.aegis.api_platform.model.SubscriptionPlan;
 import com.aegis.api_platform.policy.ApiPolicy;
+import com.aegis.api_platform.repository.SubscriptionPlanRepository;
 import com.aegis.api_platform.service.PlanApiConfigService;
 import com.aegis.api_platform.service.PolicyResolverService;
 import lombok.RequiredArgsConstructor;
@@ -15,36 +17,32 @@ import java.util.Optional;
 public class PolicyResolverServiceImpl
         implements PolicyResolverService {
 
+    private final SubscriptionPlanRepository planRepository;
     private final PlanApiConfigService planApiConfigService;
 
     @Override
-    public ApiPolicy resolve(Long planId, ApiDefinition api) {
+    public ApiPolicy resolve(Long planId, Long apiId) {
 
-        Integer effectiveRate =
-                api.getTenant()
-                        .getSubscriptionPlan()
-                        .getRateLimitPerMinute();
+        SubscriptionPlan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
 
-        Long effectiveMonthly =
-                api.getTenant()
-                        .getSubscriptionPlan()
-                        .getMonthlyQuota();
+        Integer effectiveRate = plan.getRateLimitPerMinute();
+
+        Long effectiveMonthly = plan.getMonthlyQuota();
 
         Optional<PlanApiConfig> configOpt =
-                planApiConfigService.getConfig(planId, api.getId());
+                planApiConfigService.getConfig(planId, apiId);
 
         if (configOpt.isPresent()) {
 
             PlanApiConfig config = configOpt.get();
 
             if (config.getRateLimitPerMinuteOverride() != null) {
-                effectiveRate =
-                        config.getRateLimitPerMinuteOverride();
+                effectiveRate = config.getRateLimitPerMinuteOverride();
             }
 
             if (config.getMonthlyQuotaOverride() != null) {
-                effectiveMonthly =
-                        config.getMonthlyQuotaOverride();
+                effectiveMonthly = config.getMonthlyQuotaOverride();
             }
         }
 

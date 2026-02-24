@@ -55,7 +55,7 @@ public class GatewayController {
         Long planId = api.getTenant().getSubscriptionPlan().getId();
 
         ApiPolicy policy =
-                policyResolverService.resolve(planId, api);
+                policyResolverService.resolve(planId, api.getId());
 
         //Enforce rate check
         rateLimitService.checkRateLimit(
