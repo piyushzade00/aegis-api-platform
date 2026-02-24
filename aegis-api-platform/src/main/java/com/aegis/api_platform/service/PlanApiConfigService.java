@@ -10,4 +10,11 @@ public interface PlanApiConfigService {
             Long planId,
             Long apiId
     );
+
+    void createOrUpdate(
+            Long planId,
+            Long apiId,
+            Integer rateOverride,
+            Long monthlyOverride
+    );
 }

@@ -61,11 +61,19 @@ public class PlanApiConfig extends BaseEntity {
         this.monthlyQuotaOverride = monthlyQuotaOverride;
     }
 
-    public void updateOverrides(
-            Integer rateLimitPerMinuteOverride,
-            Long monthlyQuotaOverride
+    public void setRateLimitPerMinuteOverride(
+            Integer rateLimitPerMinuteOverride
     ) {
+        if (rateLimitPerMinuteOverride != null && rateLimitPerMinuteOverride <= 0)
+            throw new IllegalArgumentException("Rate limit must be positive");
+
         this.rateLimitPerMinuteOverride = rateLimitPerMinuteOverride;
+    }
+
+    public void setMonthlyQuotaOverride(Long monthlyQuotaOverride) {
+        if (monthlyQuotaOverride != null && monthlyQuotaOverride <= 0)
+            throw new IllegalArgumentException("Monthly quota must be positive");
+
         this.monthlyQuotaOverride = monthlyQuotaOverride;
     }
 }
