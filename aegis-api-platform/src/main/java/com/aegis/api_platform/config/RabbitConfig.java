@@ -101,6 +101,7 @@ public class RabbitConfig {
         factory.setAdviceChain(
                 RetryInterceptorBuilder.stateless()
                         .maxAttempts(3)
+                        .backOffOptions(1000, 2.0, 10000)
                         .recoverer((message, cause) -> {
                             throw new AmqpRejectAndDontRequeueException(cause);
                         })

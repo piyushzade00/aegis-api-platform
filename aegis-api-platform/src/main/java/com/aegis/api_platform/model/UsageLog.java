@@ -17,6 +17,9 @@ public class UsageLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "event_id", nullable = false, unique = true)
+    private String eventId;
+
     @Column(name = "tenant_id", nullable = false)
     private Long tenantId;
 
@@ -35,12 +38,14 @@ public class UsageLog {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    public UsageLog(Long tenantId,
+    public UsageLog(String eventId,
+                    Long tenantId,
                     Long apiId,
                     Long apiKeyId,
                     int statusCode,
                     long latencyMs) {
 
+        this.eventId = eventId;
         this.tenantId = tenantId;
         this.apiId = apiId;
         this.apiKeyId = apiKeyId;

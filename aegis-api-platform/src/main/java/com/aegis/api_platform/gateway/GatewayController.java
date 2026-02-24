@@ -21,6 +21,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/gateway")
@@ -103,8 +104,11 @@ public class GatewayController {
 
         long latency = System.currentTimeMillis() - start;
 
+       String eventId = UUID.randomUUID().toString();
+
         usageEventPublisher.publish(
                 new UsageEvent(
+                        eventId,
                         tenantId,
                         api.getId(),
                         (Long) request.getAttribute("apiKeyId"),

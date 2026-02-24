@@ -7,9 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -31,13 +29,16 @@ public class QuotaServiceImpl implements QuotaService {
         if (!exists) {
             YearMonth currentMonth = YearMonth.now();
 
-            LocalDateTime start =
-                    currentMonth.atDay(1).atStartOfDay();
+            Instant start =
+                    currentMonth.atDay(1)
+                            .atStartOfDay(ZoneOffset.UTC)
+                            .toInstant();
 
-            LocalDateTime end =
+            Instant end =
                     currentMonth.plusMonths(1)
                             .atDay(1)
-                            .atStartOfDay();
+                            .atStartOfDay(ZoneOffset.UTC)
+                            .toInstant();
 
             Long countFromDb =
                     usageLogRepository.countMonthlyUsage(

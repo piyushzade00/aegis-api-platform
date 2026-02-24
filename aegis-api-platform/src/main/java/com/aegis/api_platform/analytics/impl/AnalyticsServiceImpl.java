@@ -10,9 +10,9 @@ import com.aegis.api_platform.repository.UsageLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -56,13 +56,16 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
         YearMonth currentMonth = YearMonth.now();
 
-        LocalDateTime start =
-                currentMonth.atDay(1).atStartOfDay();
+        Instant start =
+                currentMonth.atDay(1)
+                        .atStartOfDay(ZoneOffset.UTC)
+                        .toInstant();
 
-        LocalDateTime end =
+        Instant end =
                 currentMonth.plusMonths(1)
                         .atDay(1)
-                        .atStartOfDay();
+                        .atStartOfDay(ZoneOffset.UTC)
+                        .toInstant();
 
         Long used =
                 usageLogRepository.countMonthlyUsage(

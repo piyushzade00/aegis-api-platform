@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -43,17 +44,6 @@ public interface UsageLogRepository extends JpaRepository<UsageLog, Long> {
             @Param("tenantId") Long tenantId
     );
 
-//    @Query("""
-//       SELECT COUNT(u)
-//       FROM UsageLog u
-//       WHERE u.tenantId = :tenantId
-//       AND FUNCTION('DATE_FORMAT', u.createdAt, '%Y%m') = :yearMonth
-//       """)
-//    Long countMonthlyUsage(
-//            @Param("tenantId") Long tenantId,
-//            @Param("yearMonth") String yearMonth
-//    );
-
     @Query("""
    SELECT COUNT(u)
    FROM UsageLog u
@@ -63,7 +53,7 @@ public interface UsageLogRepository extends JpaRepository<UsageLog, Long> {
    """)
     Long countMonthlyUsage(
             @Param("tenantId") Long tenantId,
-            @Param("start") java.time.LocalDateTime start,
-            @Param("end") java.time.LocalDateTime end
+            @Param("start") Instant start,
+            @Param("end") Instant end
     );
 }
