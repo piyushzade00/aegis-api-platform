@@ -3,6 +3,7 @@ package com.aegis.api_platform.gateway;
 import com.aegis.api_platform.common.CorrelationIdFilter;
 import com.aegis.api_platform.messaging.event.UsageEvent;
 import com.aegis.api_platform.messaging.publisher.UsageEventPublisher;
+import com.aegis.api_platform.metrics.GatewayMetrics;
 import com.aegis.api_platform.model.ApiDefinition;
 import com.aegis.api_platform.policy.ApiPolicy;
 import com.aegis.api_platform.service.ApiDefinitionService;
@@ -36,10 +37,13 @@ public class GatewayController {
     private final UsageEventPublisher usageEventPublisher;
     private final PolicyResolverService policyResolverService;
     private final BackendCallerService backendCallerService;
+    private final GatewayMetrics gatewayMetrics;
 
     @RequestMapping("/**")
     public ResponseEntity<String> handleGateway(HttpServletRequest request,
                                                 @RequestBody(required = false) String body) {
+
+        gatewayMetrics.incrementGatewayRequest();   // Increment total request count for monitoring
 
         Long tenantId = (Long) request.getAttribute("tenantId");
 

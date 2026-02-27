@@ -1,6 +1,7 @@
 package com.aegis.api_platform.service.impl;
 
 import com.aegis.api_platform.exception.RateLimitExceededException;
+import com.aegis.api_platform.metrics.GatewayMetrics;
 import com.aegis.api_platform.service.RateLimitService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 public class RateLimitServiceImpl implements RateLimitService {
 
     private final StringRedisTemplate redisTemplate;
+    private final GatewayMetrics gatewayMetrics;
 
     @Override
     public void checkRateLimit(Long tenantId,
@@ -31,6 +33,7 @@ public class RateLimitServiceImpl implements RateLimitService {
         }
 
         if (currentCount != null && currentCount > allowedPerMinute) {
+            gatewayMetrics.incrementRateLimitExceeded();    // Increment rate limit exceeded metric
             throw new RateLimitExceededException("Rate limit exceeded");
         }
     }

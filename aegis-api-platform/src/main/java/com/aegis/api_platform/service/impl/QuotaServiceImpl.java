@@ -1,6 +1,7 @@
 package com.aegis.api_platform.service.impl;
 
 import com.aegis.api_platform.exception.MonthlyQuotaExceededException;
+import com.aegis.api_platform.metrics.GatewayMetrics;
 import com.aegis.api_platform.repository.UsageLogRepository;
 import com.aegis.api_platform.service.QuotaService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class QuotaServiceImpl implements QuotaService {
 
     private final StringRedisTemplate redisTemplate;
     private final UsageLogRepository usageLogRepository;
+    private final GatewayMetrics gatewayMetrics;
 
     @Override
     public void checkMonthlyQuota(Long tenantId,
@@ -61,6 +63,7 @@ public class QuotaServiceImpl implements QuotaService {
         Long currentCount = redisTemplate.opsForValue().increment(key);
 
         if (currentCount != null && currentCount > allowedMonthlyQuota) {
+            gatewayMetrics.incrementMonthlyQuotaExceeded(); // Increment the metric counter for quota exceedance
             throw new MonthlyQuotaExceededException("Monthly quota exceeded");
         }
     }
