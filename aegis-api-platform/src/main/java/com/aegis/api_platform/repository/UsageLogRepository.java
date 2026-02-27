@@ -15,33 +15,45 @@ import java.util.List;
 public interface UsageLogRepository extends JpaRepository<UsageLog, Long> {
 
     @Query("""
-       SELECT COUNT(u)
-       FROM UsageLog u
-       WHERE u.tenantId = :tenantId
-       """)
-    Long countTotalByTenant(@Param("tenantId") Long tenantId);
+            SELECT COUNT(u)
+            FROM UsageLog u
+            WHERE u.tenantId = :tenantId
+            AND u.createdAt >= :start
+            AND u.createdAt < :end
+        """)
+    Long countTotalByTenant(@Param("tenantId") Long tenantId,
+                            @Param("start") Instant start,
+                            @Param("end") Instant end);
 
     @Query("""
-       SELECT u.apiId AS apiId,
-              COUNT(u) AS totalRequests
-       FROM UsageLog u
-       WHERE u.tenantId = :tenantId
-       GROUP BY u.apiId
-       """)
+            SELECT u.apiId AS apiId,
+                    COUNT(u) AS totalRequests
+            FROM UsageLog u
+            WHERE u.tenantId = :tenantId
+            AND u.createdAt >= :start
+            AND u.createdAt < :end
+            GROUP BY u.apiId
+            """)
     List<ApiUsageProjection> countUsagePerApi(
-            @Param("tenantId") Long tenantId
+            @Param("tenantId") Long tenantId,
+            @Param("start") Instant start,
+            @Param("end") Instant end
     );
 
     @Query("""
-       SELECT DATE(u.createdAt) AS date,
-              COUNT(u) AS totalRequests
-       FROM UsageLog u
-       WHERE u.tenantId = :tenantId
-       GROUP BY DATE(u.createdAt)
-       ORDER BY DATE(u.createdAt)
-       """)
+            SELECT FUNCTION('DATE', u.createdAt) AS date,
+                    COUNT(u) AS totalRequests
+            FROM UsageLog u
+            WHERE u.tenantId = :tenantId
+            AND u.createdAt >= :start
+            AND u.createdAt < :end
+            GROUP BY DATE(u.createdAt)
+            ORDER BY DATE(u.createdAt)
+            """)
     List<DailyUsageProjection> countDailyUsage(
-            @Param("tenantId") Long tenantId
+            @Param("tenantId") Long tenantId,
+            @Param("start") Instant start,
+            @Param("end") Instant end
     );
 
     @Query("""

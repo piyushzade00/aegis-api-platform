@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -24,13 +25,36 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public Long getTotalUsageForTenant(Long tenantId) {
-        return usageLogRepository.countTotalByTenant(tenantId);
+        Instant now = Instant.now();
+        Instant start = now.minus(30, ChronoUnit.DAYS);
+        Instant end = now;
+
+        return usageLogRepository.countTotalByTenant(tenantId, start, end);
+    }
+
+    @Override
+    public Long getTotalUsageForTenant(Long tenantId, Instant start, Instant end) {
+        return usageLogRepository.countTotalByTenant(tenantId, start, end);
     }
 
     @Override
     public List<ApiUsageResponse> getUsagePerApi(Long tenantId) {
+        Instant now = Instant.now();
+        Instant start = now.minus(30, ChronoUnit.DAYS);
+        Instant end = now;
 
-        return usageLogRepository.countUsagePerApi(tenantId)
+        return usageLogRepository.countUsagePerApi(tenantId, start, end)
+                .stream()
+                .map(p -> new ApiUsageResponse(
+                        p.getApiId(),
+                        p.getTotalRequests()
+                ))
+                .toList();
+    }
+
+    @Override
+    public List<ApiUsageResponse> getUsagePerApi(Long tenantId, Instant start, Instant end){
+        return usageLogRepository.countUsagePerApi(tenantId, start, end)
                 .stream()
                 .map(p -> new ApiUsageResponse(
                         p.getApiId(),
@@ -41,14 +65,29 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public List<DailyUsageResponse> getDailyUsage(Long tenantId) {
+        Instant now = Instant.now();
+        Instant start = now.minus(30, ChronoUnit.DAYS);
+        Instant end = now;
 
-        return usageLogRepository.countDailyUsage(tenantId)
+        return usageLogRepository.countDailyUsage(tenantId, start, end)
                 .stream()
                 .map(p -> new DailyUsageResponse(
                         p.getDate(),
                         p.getTotalRequests()
                 ))
                 .toList();
+    }
+
+    @Override
+    public List<DailyUsageResponse> getDailyUsage(Long tenantId, Instant start, Instant end) {
+        return usageLogRepository.countDailyUsage(tenantId, start, end)
+                .stream()
+                .map(p -> new DailyUsageResponse(
+                        p.getDate(),
+                        p.getTotalRequests()
+                ))
+                .toList();
+
     }
 
     @Override
