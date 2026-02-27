@@ -3,6 +3,8 @@ package com.aegis.api_platform.repository;
 import com.aegis.api_platform.analytics.projection.ApiUsageProjection;
 import com.aegis.api_platform.analytics.projection.DailyUsageProjection;
 import com.aegis.api_platform.model.UsageLog;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,10 +36,11 @@ public interface UsageLogRepository extends JpaRepository<UsageLog, Long> {
             AND u.createdAt < :end
             GROUP BY u.apiId
             """)
-    List<ApiUsageProjection> countUsagePerApi(
+    Page<ApiUsageProjection> countUsagePerApi(
             @Param("tenantId") Long tenantId,
             @Param("start") Instant start,
-            @Param("end") Instant end
+            @Param("end") Instant end,
+            Pageable pageable
     );
 
     @Query("""

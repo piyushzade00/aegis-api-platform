@@ -7,6 +7,9 @@ import com.aegis.api_platform.dto.response.QuotaAnalyticsResponse;
 import com.aegis.api_platform.dto.response.TenantUsageResponse;
 import com.aegis.api_platform.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,10 +43,18 @@ public class AnalyticsController {
 
     @GetMapping("/tenant/{tenantId}/api-usage")
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
-    public List<ApiUsageResponse> getUsagePerApi(
-            @PathVariable Long tenantId) {
+    public Page<ApiUsageResponse> getUsagePerApi(
+            @PathVariable Long tenantId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        return analyticsService.getUsagePerApi(tenantId);
+        if (size > 50) {
+            throw new IllegalArgumentException("Max page size is 50");
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return analyticsService.getUsagePerApi(tenantId, pageable);
     }
 
     @GetMapping("/tenant/{tenantId}/daily")
@@ -83,14 +94,22 @@ public class AnalyticsController {
 
     @GetMapping("/me/api-usage")
     @PreAuthorize("hasRole('TENANT_ADMIN')")
-    public List<ApiUsageResponse> getMyApiUsage(@RequestParam(required = false) LocalDate from,
-                                                @RequestParam(required = false) LocalDate to) {
+    public Page<ApiUsageResponse> getMyApiUsage(@RequestParam(required = false) LocalDate from,
+                                                @RequestParam(required = false) LocalDate to,
+                                                @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "10") int size) {
+
+        if (size > 50) {
+            throw new IllegalArgumentException("Max page size is 50");
+        }
 
         Long tenantId = securityUtils.getCurrentTenantId();
 
         DateRange range = resolveDateRange(from, to);
 
-        return analyticsService.getUsagePerApi(tenantId, range.start(),range.end());
+        Pageable pageable = PageRequest.of(page, size);
+
+        return analyticsService.getUsagePerApi(tenantId, range.start(),range.end(), pageable);
     }
 
     @GetMapping("/me/daily")

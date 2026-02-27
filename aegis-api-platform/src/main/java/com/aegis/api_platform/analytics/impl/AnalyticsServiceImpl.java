@@ -8,6 +8,8 @@ import com.aegis.api_platform.model.Tenant;
 import com.aegis.api_platform.repository.TenantRepository;
 import com.aegis.api_platform.repository.UsageLogRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -38,29 +40,28 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     }
 
     @Override
-    public List<ApiUsageResponse> getUsagePerApi(Long tenantId) {
+    public Page<ApiUsageResponse> getUsagePerApi(Long tenantId, Pageable pageable) {
         Instant now = Instant.now();
         Instant start = now.minus(30, ChronoUnit.DAYS);
         Instant end = now;
 
-        return usageLogRepository.countUsagePerApi(tenantId, start, end)
-                .stream()
+        return usageLogRepository.countUsagePerApi(tenantId, start, end, pageable)
                 .map(p -> new ApiUsageResponse(
                         p.getApiId(),
                         p.getTotalRequests()
-                ))
-                .toList();
+                ));
     }
 
     @Override
-    public List<ApiUsageResponse> getUsagePerApi(Long tenantId, Instant start, Instant end){
-        return usageLogRepository.countUsagePerApi(tenantId, start, end)
-                .stream()
+    public Page<ApiUsageResponse> getUsagePerApi(Long tenantId,
+                                                 Instant start,
+                                                 Instant end,
+                                                 Pageable pageable) {
+        return usageLogRepository.countUsagePerApi(tenantId, start, end, pageable)
                 .map(p -> new ApiUsageResponse(
                         p.getApiId(),
                         p.getTotalRequests()
-                ))
-                .toList();
+                ));
     }
 
     @Override
