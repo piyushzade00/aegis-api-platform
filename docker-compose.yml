@@ -36,6 +36,29 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  
+  prometheus:
+    image: prom/prometheus
+    container_name: aegis-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      app:
+        condition: service_started
+
+  grafana:
+    image: grafana/grafana
+    container_name: aegis-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
 
   app:
     build:
@@ -73,3 +96,4 @@ services:
 
 volumes:
   mysql_data:
+  grafana_data:
