@@ -45,3 +45,5 @@ docker/.env
 
 # Spring Boot build
 *.jar
+
+nginx/certs/
