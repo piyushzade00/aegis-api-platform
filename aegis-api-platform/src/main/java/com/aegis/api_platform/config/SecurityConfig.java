@@ -35,6 +35,8 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/").permitAll()
 
                         // System Admin only
                         .requestMatchers("/api/admin/**").hasRole("SYSTEM_ADMIN")
