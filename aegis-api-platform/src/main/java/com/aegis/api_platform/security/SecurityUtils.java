@@ -16,7 +16,7 @@ public class SecurityUtils {
 
         AppUser userDetails = (AppUser) authentication.getPrincipal();
 
-        if (userDetails.getTenant().getId() == null) {
+        if (userDetails.getTenant() == null) {
             throw new IllegalStateException("User is not associated with any tenant.");
         }
 

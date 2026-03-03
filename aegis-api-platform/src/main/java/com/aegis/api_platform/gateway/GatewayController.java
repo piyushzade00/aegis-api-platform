@@ -47,13 +47,11 @@ public class GatewayController {
 
         Long tenantId = (Long) request.getAttribute("tenantId");
 
-        String fullPath = request.getRequestURI().replace("/gateway", "");
+        // Remove /gateway prefix
+        String fullPath = request.getRequestURI().replaceFirst("/gateway", "");
         String method = request.getMethod();
 
-        // Remove /gateway prefix
-        String path = fullPath.replaceFirst("/gateway", "");
-
-        ApiDefinition api = apiDefinitionService.resolveApi(tenantId, path, method);
+        ApiDefinition api = apiDefinitionService.resolveApi(tenantId, fullPath, method);
 
         // Check rate limit and quota based on plan and overrides
         Long planId = api.getTenant().getSubscriptionPlan().getId();
@@ -117,7 +115,7 @@ public class GatewayController {
                         tenantId,
                         api.getId(),
                         (Long) request.getAttribute("apiKeyId"),
-                        response.getStatusCodeValue(),
+                        response.getStatusCode().value(),
                         latency,
                         Instant.now(),
                         MDC.get(CorrelationIdFilter.CORRELATION_ID)

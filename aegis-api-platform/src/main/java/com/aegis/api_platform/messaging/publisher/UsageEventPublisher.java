@@ -15,7 +15,7 @@ public class UsageEventPublisher {
     public void publish(UsageEvent event) {
         rabbitTemplate.convertAndSend(
                 RabbitConfig.USAGE_EXCHANGE,
-                "usage.event",
+                RabbitConfig.USAGE_ROUTING_KEY,
                 event
         );
     }

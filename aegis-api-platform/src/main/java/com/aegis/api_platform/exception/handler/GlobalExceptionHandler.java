@@ -4,6 +4,8 @@ import com.aegis.api_platform.exception.MonthlyQuotaExceededException;
 import com.aegis.api_platform.exception.RateLimitExceededException;
 import com.aegis.api_platform.exception.model.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,8 @@ import java.time.Instant;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger log =
+            LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private ResponseEntity<ApiErrorResponse> buildResponse(
             HttpStatus status,
@@ -108,26 +112,16 @@ public class GlobalExceptionHandler {
             HttpServletRequest request
     ) {
 
-        String message = "Data integrity violation";
-
-        if (ex.getRootCause() != null) {
-            String rootMessage = ex.getRootCause().getMessage();
-
-            if (rootMessage.contains("uk_plan_api")) {
-                message = "Plan already has configuration for this API";
-            } else if (rootMessage.contains("uk_api_definition")) {
-                message = "API with same path and method already exists";
-            } else if (rootMessage.contains("plan_code")) {
-                message = "Plan code already exists";
-            } else if (rootMessage.contains("email")) {
-                message = "Email already exists";
-            }
-        }
+        log.error("Data integrity violation on {} {}: {}",
+                request.getMethod(),
+                request.getRequestURI(),
+                ex.getMessage(),
+                ex);
 
         return buildResponse(
-                HttpStatus.BAD_REQUEST,
-                "DB_CONSTRAINT_VIOLATION",
-                message,
+                HttpStatus.CONFLICT,
+                "DATA_INTEGRITY_VIOLATION",
+                "A data conflict occurred. Please check your request.",
                 request
         );
     }
@@ -137,6 +131,11 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
+        log.error("Unhandled exception on {} {}: {}",
+                request.getMethod(),
+                request.getRequestURI(),
+                ex.getMessage(),
+                ex);  // passing ex as last arg gives you the full stack trace in logs
 
         return buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,

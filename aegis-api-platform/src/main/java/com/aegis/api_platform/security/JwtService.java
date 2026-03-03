@@ -34,7 +34,7 @@ public class JwtService {
                 .claim("tenantId", user.getTenant() != null ? user.getTenant().getId() : null)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(secretKey)
                 .compact();
     }
 

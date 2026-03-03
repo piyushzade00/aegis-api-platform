@@ -12,12 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@RestController
+@RequestMapping("/api/admin/users")
+@RequiredArgsConstructor
 public class AppUserController {
-
-    @RestController
-    @RequestMapping("/api/admin/users")
-    @RequiredArgsConstructor
-    public class UserController {
 
         private final AppUserService userService;
 
@@ -29,5 +27,4 @@ public class AppUserController {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body("User created successfully");
         }
-    }
 }

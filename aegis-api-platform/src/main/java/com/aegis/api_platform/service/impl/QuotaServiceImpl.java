@@ -6,10 +6,12 @@ import com.aegis.api_platform.repository.UsageLogRepository;
 import com.aegis.api_platform.service.QuotaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +21,18 @@ public class QuotaServiceImpl implements QuotaService {
     private final UsageLogRepository usageLogRepository;
     private final GatewayMetrics gatewayMetrics;
 
+    private static final String QUOTA_SCRIPT = """
+        local current = redis.call('GET', KEYS[1])
+        if current == false then
+            redis.call('SET', KEYS[1], ARGV[1])
+            redis.call('EXPIRE', KEYS[1], tonumber(ARGV[2]))
+            current = redis.call('INCR', KEYS[1])
+        else
+            current = redis.call('INCR', KEYS[1])
+        end
+        return current
+        """;
+
     @Override
     public void checkMonthlyQuota(Long tenantId,
                                   Long apiId,
@@ -26,41 +40,20 @@ public class QuotaServiceImpl implements QuotaService {
 
         String key = buildKey(tenantId);
 
-        Boolean exists = redisTemplate.hasKey(key);
+        // Seed value from DB (this query is outside the script — acceptable,
+        // the script handles the race on SET)
+        Long seedValue = getSeedValue(tenantId);
 
-        if (!exists) {
-            YearMonth currentMonth = YearMonth.now();
+        long ttlSeconds = getRemainingSecondsInMonth();
 
-            Instant start =
-                    currentMonth.atDay(1)
-                            .atStartOfDay(ZoneOffset.UTC)
-                            .toInstant();
+        RedisScript<Long> script = RedisScript.of(QUOTA_SCRIPT, Long.class);
 
-            Instant end =
-                    currentMonth.plusMonths(1)
-                            .atDay(1)
-                            .atStartOfDay(ZoneOffset.UTC)
-                            .toInstant();
-
-            Long countFromDb =
-                    usageLogRepository.countMonthlyUsage(
-                            tenantId,
-                            start,
-                            end
-                    );
-
-            if (countFromDb == null) {
-                countFromDb = 0L;
-            }
-
-            redisTemplate.opsForValue().set(
-                    key,
-                    String.valueOf(countFromDb),
-                    Duration.ofDays(31)
-            );
-        }
-
-        Long currentCount = redisTemplate.opsForValue().increment(key);
+        Long currentCount = redisTemplate.execute(
+                script,
+                List.of(key),
+                String.valueOf(seedValue),
+                String.valueOf(ttlSeconds)
+        );
 
         if (currentCount != null && currentCount > allowedMonthlyQuota) {
             gatewayMetrics.incrementMonthlyQuotaExceeded(); // Increment the metric counter for quota exceedance
@@ -73,6 +66,23 @@ public class QuotaServiceImpl implements QuotaService {
                 .format(DateTimeFormatter.ofPattern("yyyyMM"));
 
         return "quota:" + tenantId + ":" + month;
+    }
+
+    private Long getSeedValue(Long tenantId) {
+        YearMonth currentMonth = YearMonth.now();
+        Instant start = currentMonth.atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant end = currentMonth.plusMonths(1).atDay(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+        Long count = usageLogRepository.countMonthlyUsage(tenantId, start, end);
+        return count != null ? count : 0L;
+    }
+
+    private long getRemainingSecondsInMonth() {
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime endOfMonth = now.with(now.getMonth().maxLength() == now.getDayOfMonth()
+                        ? java.time.temporal.TemporalAdjusters.firstDayOfNextMonth()
+                        : java.time.temporal.TemporalAdjusters.firstDayOfNextMonth())
+                .withHour(0).withMinute(0).withSecond(0).withNano(0);
+        return java.time.Duration.between(now, endOfMonth).getSeconds();
     }
 }
 
