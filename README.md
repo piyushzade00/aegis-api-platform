@@ -21,7 +21,7 @@ A production-grade, multi-tenant API gateway built with Spring Boot. Enforces pe
          │                   Spring Boot Application                       │
          │                                                                 │
          │  ┌──────────────────────┐     ┌───────────────────────────────┐ │
-         │  │   /api/**  (JWT)      │     │   /gateway/**  (API Key)      │ │
+         │  │   /api/**  (JWT)     │     │   /gateway/**  (API Key)      │ │
          │  │                      │     │                               │ │
          │  │  Auth, Tenant CRUD,  │     │  ApiKeyAuthFilter             │ │
          │  │  Plan Management,    │     │         │                     │ │
@@ -42,7 +42,7 @@ A production-grade, multi-tenant API gateway built with Spring Boot. Enforces pe
          │                               │         │                     │ │
          │                         ┌─────┤  UsageEventPublisher          │ │
          │                         │ MQ  │  (async fire-and-forget)      │ │
-         │                         └─────┘                               │ │
+         │                         └─────└───────────────────────────────┘ │
          └─────────────────────────────────────────────────────────────────┘
                    │ RabbitMQ                         │ MySQL
                    ▼                                  ▼
@@ -51,8 +51,8 @@ A production-grade, multi-tenant API gateway built with Spring Boot. Enforces pe
          │  (DLQ + retry)   │             │  (indexed queries)  │
          │       │          │             └─────────────────────┘
          │       ▼          │             ┌─────────────────────┐
-         │  UsageConsumer   │             │  Prometheus + Grafana│
-         │  (idempotent)    │             │  (Micrometer metrics)│
+         │  UsageConsumer   │             │ Prometheus + Grafana│
+         │  (idempotent)    │             │ (Micrometer metrics)│
          └──────────────────┘             └─────────────────────┘
 ```
 
