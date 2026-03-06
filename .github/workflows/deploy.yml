@@ -20,6 +20,7 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean package -DskipTests
+        working-directory: aegis-api-platform
 
       - name: Copy jar to EC2
         uses: appleboy/scp-action@master
@@ -27,7 +28,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "target/*.jar"
+          source: "aegis-api-platform/target/*.jar"
           target: "/home/ubuntu/aegis-api-platform/target/"
 
       - name: Deploy on EC2
