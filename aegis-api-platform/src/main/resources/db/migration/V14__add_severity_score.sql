@@ -1,0 +1,1 @@
+ALTER TABLE ai_alert_log ADD COLUMN severity_score BIGINT;

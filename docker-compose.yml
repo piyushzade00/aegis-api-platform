@@ -91,6 +91,7 @@ services:
       RABBIT_USERNAME: ${RABBIT_USER}
       RABBIT_PASSWORD: ${RABBIT_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
   
   nginx:
     image: nginx:alpine

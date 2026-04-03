@@ -22,6 +22,10 @@ public class RabbitConfig {
     public static final String USAGE_DLQ_QUEUE = "usage.dlq.queue";
     public static final String USAGE_DLQ_ROUTING_KEY = "usage.dlq";
 
+    public static final String ALERT_EXCHANGE = "alert.exchange";
+    public static final String ALERT_QUEUE = "alert.queue";
+    public static final String ALERT_ROUTING_KEY = "alert.event";
+
     // ---------- MAIN EXCHANGE ----------
     @Bean
     public DirectExchange usageExchange() {
@@ -32,6 +36,11 @@ public class RabbitConfig {
     @Bean
     public DirectExchange usageDlqExchange() {
         return new DirectExchange(USAGE_DLQ_EXCHANGE);
+    }
+
+    @Bean
+    public DirectExchange alertExchange() {
+        return new DirectExchange(ALERT_EXCHANGE);
     }
 
     // ---------- MAIN QUEUE ----------
@@ -50,6 +59,11 @@ public class RabbitConfig {
                 .build();
     }
 
+    @Bean
+    public Queue alertQueue() {
+        return QueueBuilder.durable(ALERT_QUEUE).build();
+    }
+
     // ---------- BINDINGS ----------
     @Bean
     public Binding usageBinding() {
@@ -65,6 +79,14 @@ public class RabbitConfig {
                 .bind(usageDlqQueue())
                 .to(usageDlqExchange())
                 .with(USAGE_DLQ_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding alertBinding() {
+        return BindingBuilder
+                .bind(alertQueue())
+                .to(alertExchange())
+                .with(ALERT_ROUTING_KEY);
     }
 
     // ---------- JSON CONVERTER ----------

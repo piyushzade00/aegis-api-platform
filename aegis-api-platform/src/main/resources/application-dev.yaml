@@ -17,14 +17,29 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBIT_HOST}
+    port: ${RABBIT_PORT}
+    username: ${RABBIT_USERNAME}
+    password: ${RABBIT_PASSWORD}
+
+  ai:
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY}
+        chat:
+          options:
+            model: gemini-2.5-flash
+            temperature: 0.2
+            max-tokens: 512
+    mcp:
+      server:
+        enabled: true
+        name: aegis-mcp-server
+        version: 1.0.0
 
 server:
   port: 8081
@@ -43,3 +58,11 @@ logging:
     root: INFO
     io.github.resilience4j: DEBUG
     org.springframework.amqp: DEBUG
+
+ai:
+  rag:
+    daily-limit: ${AI_RAG_DAILY_LIMIT:50}
+  agent:
+    schedule: ${AI_AGENT_SCHEDULE:0 0 * * * *}
+    quota-warning-threshold: 0.8
+    rate-breach-threshold: 10

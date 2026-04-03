@@ -94,4 +94,9 @@ public class TenantServiceImpl implements TenantService {
                 .orElseThrow(() -> new IllegalArgumentException("Tenant not found."));
     }
 
+    @Override
+    public List<Long> getAllActiveTenants() {
+        return tenantRepository.findActiveTenantIds();
+    }
+
 }

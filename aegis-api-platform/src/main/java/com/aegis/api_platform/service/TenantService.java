@@ -16,4 +16,6 @@ public interface TenantService {
     Tenant getTenant(Long tenantId);
 
     List<Tenant> getAllTenants();
+
+    List<Long> getAllActiveTenants();
 }

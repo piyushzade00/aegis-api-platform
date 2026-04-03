@@ -1,5 +1,6 @@
 package com.aegis.api_platform.exception.handler;
 
+import com.aegis.api_platform.exception.AiRateLimitExceededException;
 import com.aegis.api_platform.exception.MonthlyQuotaExceededException;
 import com.aegis.api_platform.exception.RateLimitExceededException;
 import com.aegis.api_platform.exception.model.ApiErrorResponse;
@@ -122,6 +123,18 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT,
                 "DATA_INTEGRITY_VIOLATION",
                 "A data conflict occurred. Please check your request.",
+                request
+        );
+    }
+
+    @ExceptionHandler(AiRateLimitExceededException.class)
+    public ResponseEntity<ApiErrorResponse> handleAiRateLimit(
+            AiRateLimitExceededException ex,
+            HttpServletRequest request) {
+        return buildResponse(
+                HttpStatus.TOO_MANY_REQUESTS,
+                "AI_QUERY_LIMIT_EXCEEDED",
+                ex.getMessage(),
                 request
         );
     }

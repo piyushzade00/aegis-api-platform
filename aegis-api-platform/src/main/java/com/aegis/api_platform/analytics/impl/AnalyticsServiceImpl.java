@@ -4,7 +4,6 @@ import com.aegis.api_platform.analytics.service.AnalyticsService;
 import com.aegis.api_platform.dto.response.ApiUsageResponse;
 import com.aegis.api_platform.dto.response.DailyUsageResponse;
 import com.aegis.api_platform.dto.response.QuotaAnalyticsResponse;
-import com.aegis.api_platform.model.Tenant;
 import com.aegis.api_platform.repository.TenantRepository;
 import com.aegis.api_platform.repository.UsageLogRepository;
 import lombok.RequiredArgsConstructor;
@@ -118,11 +117,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             used = 0L;
         }
 
-        Tenant tenant = tenantRepository.findById(tenantId)
-                .orElseThrow(() -> new IllegalArgumentException("Tenant not found"));
-
         Long monthlyQuota =
-                tenant.getSubscriptionPlan().getMonthlyQuota();
+                tenantRepository.findMonthlyQuotaByTenantId(tenantId);
+
+        if (monthlyQuota == null) {
+            throw new IllegalArgumentException("Tenant not found");
+        }
 
         Long remaining = Math.max(0, monthlyQuota - used);
 

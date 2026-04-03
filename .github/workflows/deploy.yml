@@ -9,28 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Build with Maven
-        run: mvn clean package -DskipTests
-        working-directory: aegis-api-platform
-
-      - name: Copy jar to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "aegis-api-platform/target/*.jar"
-          target: "/home/ubuntu/aegis-api-platform/target/"
-
       - name: Deploy on EC2
         uses: appleboy/ssh-action@master
         with:
@@ -38,5 +16,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            set -e
             cd /home/ubuntu/aegis-api-platform
-            docker-compose restart app
+            git pull origin main
+            docker-compose up --build -d app
