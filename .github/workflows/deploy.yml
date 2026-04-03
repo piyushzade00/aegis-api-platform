@@ -19,4 +19,4 @@ jobs:
             set -e
             cd /home/ubuntu/aegis-api-platform
             git pull origin main
-            docker-compose up --build -d app
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d app
